@@ -28,13 +28,33 @@ def video_upload():
         return "temp/temp.mp4", uploaded_file, length
     return None, None, None
         
+load_dotenv()
+
+LAB_LOGO = os.environ.get("LAB_LOGO")
+UNI_LOGO = os.environ.get("UNI_LOGO")
+INS_LOGO = os.environ.get("INS_LOGO")
 
 st.set_page_config(layout="wide")  # Enable wide layout
+
+col_left, _ = st.columns([1, 3])  # Left for logos, right for spacing
+with col_left:
+    with st.container():
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center; align-items: center; 
+                        gap: 20px; background-color: white; padding: 10px; 
+                        border-radius: 10px; width: 100%;">
+                <img src="{UNI_LOGO}" width="100">
+                <img src="{LAB_LOGO}" width="100">
+                <img src="{INS_LOGO}" width="100">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 st.title("🐛 Larvae Processing App")
 
 # Upload a video
-load_dotenv()
 min_rep, max_rep, def_rep = os.environ.get("MIN_REP"), os.environ.get("MAX_REP"), os.environ.get("DEF_REP")
 min_rep, max_rep, def_rep = int(min_rep), int(max_rep), int(def_rep)
 temp_path, uploaded_file, length = video_upload()
@@ -65,10 +85,9 @@ if uploaded_file is not None:
             col1, col2, col3 = st.columns([1, 2, 1])  # Middle column is wider
             with col2:  
                 if st.button("🚀 Process Video", use_container_width=True):
-                    st.info("⏳ Processing Video...")
                     success = st.empty()
                     progress_bar = st.progress(0)
-                    time_display = st.empty()  # Placeholder for time updates
+                    time_display = st.info("⏳ Processing Video...")
 
                     start_time = time.time()  # Start timer
 
@@ -83,9 +102,10 @@ if uploaded_file is not None:
 
                         # Estimate remaining time
                         elapsed_time = time.time() - start_time
-                        time_display.text(f"⏱️ Elapsed Time: {elapsed_time:.2f}s")
+                        time_display.info(f"⏳ Processing Video... Elapsed Time: {elapsed_time:.2f}s")
                     
                     progress_bar.empty()  # Remove old progress bar
+                    time_display.empty()
                     success.success("✅ Processing Complete!")
 
                     # Move processed file
