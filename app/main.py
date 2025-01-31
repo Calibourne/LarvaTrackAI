@@ -123,6 +123,7 @@ def main():
                         process_video(temp_path, N, repetitions)
 
         with postprocessing:
+            st.subheader("🛠️ Postprocessing & Analysis")
             display_processed_video()
 
 if __name__ == "__main__":
