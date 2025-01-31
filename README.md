@@ -8,16 +8,16 @@ LarvaTrackAI is a cutting-edge video processing pipeline designed for entomology
 
 ## 📚 Table of Contents
 
-- [🚀 Features](#features)
-- [📥 Installation](#installation)
-- [🛠️ Usage](#usage)
-- [🔮 Future Scope](#future-scope)
-- [🤝 Contributing](#contributing)
-  - [✅ What You Can Contribute](#what-you-can-contribute)
-  - [🚫 What’s Not Allowed](#whats-not-allowed)
-  - [📌 How to Contribute](#how-to-contribute)
-- [🛡️ License](#license)
-- [✨ Get Started Now!](#get-started-now)
+- [🚀 Features](#-features)
+- [📥 Installation](#-installation)
+- [🛠️ Usage](#-usage)
+- [🔮 Future Scope](#-future-scope)
+- [🤝 Contributing](#-contributing)
+  - [✅ What You Can Contribute](#-what-you-can-contribute)
+  - [🚫 What’s Not Allowed](#-whats-not-allowed)
+  - [📌 How to Contribute](#-how-to-contribute)
+- [🛡️ License](#-license)
+- [✨ Get Started Now!](#-get-started-now)
 
 ---
 
