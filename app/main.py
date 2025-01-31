@@ -1,4 +1,3 @@
-import re
 import streamlit as st
 from bg_removal import remove_background
 import tempfile
@@ -34,7 +33,12 @@ LAB_LOGO = os.environ.get("LAB_LOGO")
 UNI_LOGO = os.environ.get("UNI_LOGO")
 INS_LOGO = os.environ.get("INS_LOGO")
 
-st.set_page_config(layout="wide")  # Enable wide layout
+st.set_page_config(
+    page_title="LarvaTrackAI",
+    page_icon="🐛",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 col_left, _ = st.columns([1, 3])  # Left for logos, right for spacing
 with col_left:
