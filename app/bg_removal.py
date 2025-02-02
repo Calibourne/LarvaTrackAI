@@ -1,11 +1,10 @@
 import os
-import cv2 as cv
-import numpy as np
-import tempfile
-import subprocess
 import time
+import cv2 as cv
+import subprocess
+import numpy as np
 
-def calc_median_background(vid: str, N: int) -> np.ndarray:
+def calc_agg_background(vid: str, N: int, method: str) -> np.ndarray:
     """Calculate median background from first N frames of video."""
     cap = cv.VideoCapture(vid)
     bg_frames = []
@@ -16,21 +15,27 @@ def calc_median_background(vid: str, N: int) -> np.ndarray:
         bg_frames.append(frame)
     cap.release()
     try:
-        median_bg = np.median(bg_frames, axis=0).astype(np.uint8)
+        if method.lower() == "mean":
+            agg_bg = np.mean(bg_frames, axis=0).astype(np.uint8)
+        elif method.lower() == "median":
+            agg_bg = np.median(bg_frames, axis=0).astype(np.uint8)
+        else:
+            raise ValueError(f"Invalid method: {method}")
     except Exception as e:
-        raise ValueError(f"Error computing median background: {e}")
-    return median_bg
+        print(f"Error: {e}")
+        return None
+    return agg_bg
 
-def write_bgless(vid: str, median_background: np.ndarray, progress_elements=None) -> None:
+def write_bgless(
+        vid: str, median_background: np.ndarray, 
+        progress_elements=None, output_path: str = 'temp/processed_1.mp4') -> None:
     """Write video without background to output_path."""
     cap = cv.VideoCapture(vid)
     w, h = int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv.CAP_PROP_FPS)
     length = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
 
-    temp_output = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-    output_path = temp_output.name
-    temp_output.close()  # Close temp file to allow writing
+    
 
     # Set up video writer
     fourcc = cv.VideoWriter_fourcc(*'MP4V')
@@ -65,16 +70,41 @@ def write_bgless(vid: str, median_background: np.ndarray, progress_elements=None
 
     return output_path
 
-def remove_background(vid: str, N: int, progress_elements) -> str:
+def threshold(vid, lower, upper, output_path: str = 'temp/processed_2.mp4') -> str:
+    cap = cv.VideoCapture(vid)
+    fps = cap.get(cv.CAP_PROP_FPS)
+    w, h = int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+    out = cv.VideoWriter(output_path, cv.VideoWriter_fourcc(*'MP4V'), fps, (w, h))
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        mask = cv.threshold(cv.cvtColor(frame, cv.COLOR_BGR2GRAY), lower, upper, cv.THRESH_OTSU)[1]
+        n_frame = np.zeros_like(frame)
+        # find contours
+        contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        max_contour = max(contours, key=cv.contourArea)
+        cv.drawContours(n_frame, [max_contour], -1, (255, 255, 255), -1)
+
+        out.write(n_frame)
+    
+    cap.release()
+    out.release()
+
+    return output_path
+
+def remove_background(vid: str, N: int, method: str, progress_elements) -> str:
     """Process video and remove background."""
 
-    median_background = calc_median_background(vid, N)
-    output_path = write_bgless(vid, median_background, progress_elements)
+    agg_background = calc_agg_background(vid, N, method)
+    output_path_1 = write_bgless(vid, agg_background, progress_elements)
+    output_path_2 = threshold(output_path_1, 50, 255)
+    os.remove(output_path_1)
     
     # encode the video
-    encoded_vid = output_path.replace(".mp4", "_encoded.mp4")
-    ffmpeg_cmd = f"ffmpeg -i {output_path} -c:v libx264 -crf 23 -preset veryfast -c:a copy {encoded_vid} -y"
+    encoded_vid = output_path_2.replace(".mp4", "_encoded.mp4")
+    ffmpeg_cmd = f"ffmpeg -i {output_path_2} -c:v libx264 -crf 23 -preset veryfast -c:a copy {encoded_vid} -y"
     subprocess.run(ffmpeg_cmd, shell=True)
-    os.remove(output_path)  # Remove unencoded video
+    os.remove(output_path_2)  # Remove unencoded video
 
     return encoded_vid
