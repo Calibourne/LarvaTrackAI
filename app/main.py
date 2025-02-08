@@ -133,11 +133,7 @@ def thresholding_controls():
 def main():
     """Structure the Streamlit app."""
     initialize_app()
-    # temp_path, uploaded_file, length = handle_video_upload()
-
-    temp_path, uploaded_file, length = None, None, None
-    handle_video_upload()
-
+    temp_path, uploaded_file, length = handle_video_upload()
 
     if uploaded_file:
         col1, col2 = st.columns(2)
