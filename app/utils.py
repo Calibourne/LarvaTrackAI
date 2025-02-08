@@ -6,7 +6,7 @@ import shutil
 import os
 
 def video_upload():
-    uploaded_file = st.upload_fileobj("Choose a video...", type=['mp4'])
+    uploaded_file = st.file_uploader("Choose a video...", type=['mp4'])
     if uploaded_file is not None:
         # st.session_state.processing_done = False
         # with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
